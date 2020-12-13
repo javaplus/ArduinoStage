@@ -3,10 +3,13 @@
   #include <avr/power.h>
 #endif
 
+
 #define LED_PIN     2
 #define NUM_LEDS    10
+#define redPotPin 4
+#define bluePotPin 5
+#define greenPotPin 3
 
-int brightness = 75;
 
 // Declare our NeoPixel objects:
 Adafruit_NeoPixel lightStrip(NUM_LEDS, LED_PIN, NEO_RGB + NEO_KHZ800);
@@ -20,7 +23,16 @@ Adafruit_NeoPixel lightStrip(NUM_LEDS, LED_PIN, NEO_RGB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
+
+
+int brightness = 75;
 boolean gettingBrighter=true;
+int redColorLevel=150;
+int blueColorLevel=150;
+int greenColorLevel=150;
+
+
+
 void setup() {
 
   Serial.begin(9600);
@@ -33,8 +45,13 @@ void setup() {
 
 void loop() {
   //lightStrip.clear();
+    blueColorLevel = readValueForPotPinMapToColorValue(bluePotPin);            
   
-    colorWipe(lightStrip.Color(0,150,0), 4);
+    redColorLevel = readValueForPotPinMapToColorValue(redPotPin); 
+    
+    greenColorLevel = readValueForPotPinMapToColorValue(greenPotPin); 
+    
+    colorWipe(lightStrip.Color(greenColorLevel,redColorLevel,blueColorLevel), 4);
 
     //lightStrip.setPixelColor(i, lightStrip.Color(0, 150, 0));
     if(gettingBrighter){
@@ -62,6 +79,15 @@ void loop() {
   //phaseInAndOut(100);
 }
 
+int readValueForPotPinMapToColorValue(int potPin){
+      int potValue = analogRead(potPin);            // reads the value of the potentiometer (value between 0 and 1023)
+  
+  Serial.println("Pot pin reading");
+  
+  Serial.println(potValue);
+  return map(potValue, 0, 700, 0, 255);
+}
+
 // Fill strip pixels one after another with a color. Strip is NOT cleared
 // first; anything there will be covered pixel by pixel. Pass in color
 // (as a single 'packed' 32-bit value, which you can get by calling
@@ -72,7 +98,7 @@ void colorWipe(uint32_t color, int wait) {
   for(int i=0; i<lightStrip.numPixels(); i++) { // For each pixel in strip...
     lightStrip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
     //Serial.println("brightness");
-    //Serial.println(brightness);
+    Serial.println(brightness);
     lightStrip.setBrightness(brightness);
     lightStrip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
