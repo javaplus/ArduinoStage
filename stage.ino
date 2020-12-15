@@ -6,9 +6,9 @@
 
 #define LED_PIN     2
 #define NUM_LEDS    10
-#define redPotPin 4
-#define bluePotPin 5
-#define greenPotPin 3
+#define redPotPin 1
+#define bluePotPin 0
+#define greenPotPin 2
 
 
 // Declare our NeoPixel objects:
@@ -50,23 +50,42 @@ void loop() {
     redColorLevel = readValueForPotPinMapToColorValue(redPotPin); 
     
     greenColorLevel = readValueForPotPinMapToColorValue(greenPotPin); 
-    
-    colorWipe(lightStrip.Color(greenColorLevel,redColorLevel,blueColorLevel), 4);
+
+    /*Serial.print("red color value:");
+    Serial.println(redColorLevel);
+
+    Serial.print("green color value:");
+    Serial.println(greenColorLevel);
+
+    Serial.print("blue color value:");
+    Serial.println(blueColorLevel);
+      */
+    colorWipe(lightStrip.Color(greenColorLevel,redColorLevel,blueColorLevel), 2);
 
     //lightStrip.setPixelColor(i, lightStrip.Color(0, 150, 0));
     if(gettingBrighter){
-      if(brightness < 255){
-        brightness+=5;
+      // get bright slower at first
+      if(brightness < 60){
+        brightness+=2;
+      }else if(brightness < 250){
+        brightness+=4;
       }else{
         gettingBrighter=false;
       }
     }
     if(!gettingBrighter){
-      if(brightness > 10){
-      brightness-=5;
+      if(brightness > 3 && brightness < 60){
+        brightness-=2;
+      }else if(brightness > 5){
+        brightness-=3;
       }else{
        gettingBrighter=true;
       }
+    }
+    if(brightness < 0 && !gettingBrighter){
+      brightness = 1;
+    }else if(brightness > 254 && gettingBrighter){
+      brightness = 255;
     }
     
     
@@ -82,10 +101,13 @@ void loop() {
 int readValueForPotPinMapToColorValue(int potPin){
       int potValue = analogRead(potPin);            // reads the value of the potentiometer (value between 0 and 1023)
   
-  Serial.println("Pot pin reading");
+    //Serial.println("Pot pin reading");
+    
+    //Serial.println(potValue);
   
-  Serial.println(potValue);
-  return map(potValue, 0, 700, 0, 255);
+   
+
+  return map(potValue, 0, 1023, 255, 0);
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
@@ -97,8 +119,8 @@ void colorWipe(uint32_t color, int wait) {
   //Serial.println("In Color wipe");
   for(int i=0; i<lightStrip.numPixels(); i++) { // For each pixel in strip...
     lightStrip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-    //Serial.println("brightness");
-    Serial.println(brightness);
+    //Serial.print("brightness:");
+    //Serial.println(brightness);
     lightStrip.setBrightness(brightness);
     lightStrip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
